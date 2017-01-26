@@ -181,6 +181,8 @@
 					AntBuildDebuggable = 1,
 					ATL = 1,
 					C7DebugInfo = 1,
+					Cpp11 = 1,
+					Cpp14 = 1,
 					DebugEnvsDontMerge = 1,
 					DebugEnvsInherit = 1,
 					DeploymentContent = 1,

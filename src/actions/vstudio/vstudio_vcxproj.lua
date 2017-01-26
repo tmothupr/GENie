@@ -81,7 +81,16 @@
 		return t[config.kind]
 	end
 
-
+	function vc2010.config_type_emscripten(config)
+		local t =
+		{
+			SharedLib = "DynamicLibrary", -- not allowed by Emscripten platform
+			StaticLib = "StaticLibrary",
+			ConsoleApp = "JSApplication",
+			WindowedApp = "HTMLPage"
+		}
+		return t[config.kind]
+	end
 
 	local function if_config_and_platform()
 		return 'Condition="\'$(Configuration)|$(Platform)\'==\'%s\'"'
@@ -101,6 +110,19 @@
 		return result
 	end
 
+	local function optimisation_emscripten(cfg)
+		local result = "O0"
+		for _, value in ipairs(cfg.flags) do
+			if (value == "Optimize") then
+				result = "O3"
+			elseif (value == "OptimizeSize") then
+				result = "Os"
+			elseif (value == "OptimizeSpeed") then
+				result = "O2"
+			end
+		end
+		return result
+	end
 
 --
 -- This property group describes a particular configuration: what
@@ -108,10 +130,16 @@
 --
 
 	function vc2010.configurationPropertyGroup(cfg, cfginfo)
-		_p(1, '<PropertyGroup '..if_config_and_platform() ..' Label="Configuration">'
-			, premake.esc(cfginfo.name))
-		_p(2, '<ConfigurationType>%s</ConfigurationType>',vc2010.config_type(cfg))
-		_p(2, '<UseDebugLibraries>%s</UseDebugLibraries>', iif(optimisation(cfg) == "Disabled","true","false"))
+		_p(1,'<PropertyGroup '..if_config_and_platform() ..' Label="Configuration">'
+				, premake.esc(cfginfo.name))
+
+		if cfg.platform == "Emscripten" then
+			_p(2,'<ConfigurationType>%s</ConfigurationType>', vc2010.config_type_emscripten(cfg))
+		else
+			_p(2,'<ConfigurationType>%s</ConfigurationType>', vc2010.config_type(cfg))
+		end
+
+		_p(2,'<UseDebugLibraries>%s</UseDebugLibraries>', iif(optimisation(cfg) == "Disabled","true","false"))
 
 		_p(2, '<PlatformToolset>%s</PlatformToolset>', premake.vstudio.toolset)
 
@@ -323,6 +351,14 @@
 
 	end
 
+	local function cppstandard(cfg)
+		if cfg.flags.Cpp14 then
+			_p(3, '<CppLanguageStandard>c++14</CppLanguageStandard>')
+		elseif cfg.flags.Cpp11 then
+			_p(3, '<CppLanguageStandard>c++11</CppLanguageStandard>')
+		end
+	end
+	
 	local function exceptions(cfg)
 		if cfg.platform == "Orbis" then
 			if cfg.flags.NoExceptions then
@@ -448,6 +484,11 @@
 		local unsignedChar = "/J "
 		local buildoptions = cfg.buildoptions
 
+		if cfg.platform == "Emscripten" then
+			-- debug, remove before commit or add a flag
+			_p(3,'<EchoCommandLines>true</EchoCommandLines>')
+		end
+
 		if cfg.platform == "Orbis" then
 			unsignedChar = "-funsigned-char ";
 			_p(3,'<GenerateDebugInformation>%s</GenerateDebugInformation>', tostring(cfg.flags.Symbols ~= nil))
@@ -494,6 +535,8 @@
 			else
 				_p(3,'<OptimizationLevel>O2</OptimizationLevel>')
 			end
+		elseif cfg.platform == "Emscripten" then
+			_p(3,'<OptimizationLevel>%s</OptimizationLevel>', optimisation_emscripten(cfg))
 		else
 			_p(3,'<Optimization>%s</Optimization>', optimisation(cfg))
 		end
@@ -583,6 +626,7 @@
 			_p(3, '<TreatWarningAsError>true</TreatWarningAsError>')
 		end
 
+		cppstandard(cfg)
 		exceptions(cfg)
 		rtti(cfg)
 		calling_convention(cfg)
@@ -664,6 +708,11 @@
 				_p(2,'<OutputFile>$(OutDir)%s</OutputFile>',cfg.buildtarget.name)
 				additional_options(2,cfg)
 				link_target_machine(2,cfg)
+
+				if cfg.platform == "Emscripten" then
+					-- debug, remove before commit or add a flag
+					_p(2,'<EchoCommandLines>true</EchoCommandLines>')
+				end
 			_p(1,'</Lib>')
 		end
 	end
@@ -748,6 +797,11 @@
 			_p(3, '<ProgramDatabaseFile>$(OutDir)%s.pdb</ProgramDatabaseFile>'
 				, path.getbasename(cfg.buildtarget.name)
 				)
+		end
+
+		if cfg.platform == "Emscripten" then
+			-- debug, remove before commit or add a flag
+			_p(3,'<EchoCommandLines>true</EchoCommandLines>')
 		end
 
 		if premake.config.isoptimizedbuild(cfg.flags) then
@@ -1129,6 +1183,14 @@
 							_p(3, '<ObjectFileName '.. if_config_and_platform() .. '>$(IntDir)%s\\</ObjectFileName>', premake.esc(vsconfig.name), tostring(disambiguation))
 						end
 					end
+				end
+
+				if path.iscppfile(file.name) and not path.iscfile(file.name)  then
+					_p(3, '<CLanguageStandard>Default</CLanguageStandard>')
+				end
+
+				if path.iscfile(file.name) then
+					_p(3, '<CppLanguageStandard>Default</CppLanguageStandard>')
 				end
 
 				if path.iscxfile(file.name) then
