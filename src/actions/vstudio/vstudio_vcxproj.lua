@@ -1176,7 +1176,7 @@
 					-- Android and NX need a full path to an object file, not a dir.
 					local cfg = premake.getconfig(prj, vsconfig.src_buildcfg, vsconfig.src_platform)
 					local namestyle = premake.getnamestyle(cfg)
-					if namestyle == "TegraAndroid" or namestyle == "NX" then
+					if namestyle == "TegraAndroid" or namestyle == "NX" or namestyle =="Emscripten" then
 						_p(3, '<ObjectFileName '.. if_config_and_platform() .. '>$(IntDir)%s.o</ObjectFileName>', premake.esc(vsconfig.name), premake.esc(path.translate(path.trimdots(path.removeext(file.name)))) )
 					else
 						if disambiguation > 0 then
