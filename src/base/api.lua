@@ -185,6 +185,7 @@
 					Cpp14 = 1,
 					Cpp17 = 1,
 					CppLatest = 1,
+					CppModules = 1,
 					DebugEnvsDontMerge = 1,
 					DebugEnvsInherit = 1,
 					DeploymentContent = 1,
@@ -537,6 +538,12 @@
 				end
 				return nil, "invalid option"
 			end,
+		},
+
+		cxxmodule =
+		{
+			kind  = "table",
+			scope = "project",
 		},
 
 		pchheader =
