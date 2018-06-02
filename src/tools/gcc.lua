@@ -43,6 +43,10 @@
 
 	local cxxflags =
 	{
+		Cpp11          = "-std=c++11",
+		Cpp14          = "-std=c++14",
+		Cpp17          = "-std=c++17",
+		CppLatest      = "-std=c++2a",
 		NoExceptions   = "-fno-exceptions",
 		NoRTTI         = "-fno-rtti",
 		UnsignedChar   = "-funsigned-char",
