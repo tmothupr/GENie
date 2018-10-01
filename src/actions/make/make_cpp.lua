@@ -102,7 +102,7 @@
 				_p('else')
 				_p('\t$(SILENT) if exist $(subst /,\\\\,$(TARGET)) del $(subst /,\\\\,$(TARGET))')
 				_p('endif')
-				_p('\t$(SILENT) $(LINKCMD) $(LINKOBJS)' .. (os.is("MacOSX") and " 2>&1 > /dev/null | sed -e '/.o) has no symbols$$/d'" or ""))
+				_p('\t$(SILENT) $(LINKCMD)' .. (os.is("MacOSX") and " 2>&1 > /dev/null | sed -e '/.o) has no symbols$$/d'" or ""))
 			else
 				_p('\t$(call RM,$(TARGET))')
 				_p('\t@$(call max_args,$(LINKCMD),'.. prj.archivesplit_size ..',$(LINKOBJS))' .. (os.is("MacOSX") and " 2>&1 > /dev/null | sed -e '/.o) has no symbols$$/d'" or ""))
@@ -463,7 +463,7 @@
 
 		if cfg.kind == "StaticLib" then
 			if (not prj.options.ArchiveSplit) then
-				_p('  LINKCMD             = $(AR) %s $(TARGET)', make.list(cc.getarchiveflags(prj, cfg, false)))
+				_p('  LINKCMD             = $(AR) %s $(TARGET) $(LINKOBJS)', make.list(cc.getarchiveflags(prj, cfg, false)))
 			else
 				_p('  LINKCMD             = $(AR) %s $(TARGET)', make.list(cc.getarchiveflags(prj, cfg, false)))
 				_p('  LINKCMD_NDX         = $(AR) %s $(TARGET)', make.list(cc.getarchiveflags(prj, cfg, true)))
