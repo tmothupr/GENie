@@ -113,7 +113,7 @@
 		Emscripten = {
 			cc         = "$(EMSCRIPTEN)/emcc",
 			cxx        = "$(EMSCRIPTEN)/em++",
-			ar         = "$(EMSCRIPTEN)/emar",
+			ar         = "$(EMSCRIPTEN)/em++",
 			cppflags   = "-MMD -MP",
 		}
 	}
@@ -283,6 +283,11 @@
 		if cfg.platform:startswith("Universal") then
 				if prj.options.ArchiveSplit then
 					error("gcc tool 'Universal*' platforms do not support split archives")
+				end
+				table.insert(result, '-o')
+        elseif cfg.platform == "Emscripten" then
+				if prj.options.ArchiveSplit then
+					error("gcc tool 'Emscripten' platforms do not support split archives")
 				end
 				table.insert(result, '-o')
 		else
