@@ -102,7 +102,6 @@
 		{
 			cfgsuffix       = "emscripten",
 			iscrosscompiler = true,
-			nosharedlibs    = true,
 			namestyle       = "Emscripten",
 		},
 	}

@@ -561,7 +561,7 @@
 			elseif kind == "StaticLib" then
 				ext = ".bc"
 			elseif kind == "SharedLib" then
-				ext = ".js"
+				ext = ".wasm"
 			end
 		end
 
